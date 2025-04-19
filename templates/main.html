@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>UFC Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            text-align: center;
+            background-color: #121213;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            border-bottom: 1px solid #3a3a3c;
+            padding-bottom: 10px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        header img {
+            height: 120px;
+            width: auto;
+        }
+
+        .game-container {
+            position: relative;
+            margin: 0 auto;
+            max-width: 1200px;
+            padding: 0 20px;
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .game-content {
+            flex: 1;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 40px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 400px;  /* Fixed width */
+            padding: 12px 20px;
+            margin: 0;
+            box-sizing: border-box;
+            background-color: #3a3a3c;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 18px;
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="text"]:focus {
+            outline: 2px solid #818384;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: #538d4e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+            font-family: Arial, sans-serif;
+            font-weight: 700;
+        }
+
+        button:hover {
+            background-color: #437c3d;
+        }
+
+        button.new-fighter {
+            background-color: #3a3a3c;
+        }
+
+        button.new-fighter:hover {
+            background-color: #4a4a4c;
+        }
+
+        #guesses {
+            width: 100%;
+            max-width: 1000px;  /* Adjust this value to match your image width */
+            margin: 20px auto;
+        }
+
+        .guess-header {
+            display: grid;
+            grid-template-columns: 
+                2fr        /* Name */
+                1.1fr      /* Division/Weight - Increased from 1fr to 1.1fr */
+                1fr        /* Gender */
+                0.8fr      /* Wins */
+                0.8fr      /* Losses */
+                1.3fr      /* Stance */
+                1fr        /* Height */
+                1fr        /* Reach */
+                0.8fr      /* Age */
+                1fr;       /* Active */
+            background-color: #3a3a3c;
+            padding: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .guess-row {
+            display: grid;
+            grid-template-columns: 
+                2fr        /* Name */
+                1.1fr      /* Division/Weight - Increased from 1fr to 1.1fr */
+                1fr        /* Gender */
+                0.8fr      /* Wins */
+                0.8fr      /* Losses */
+                1.3fr      /* Stance */
+                1fr        /* Height */
+                1fr        /* Reach */
+                0.8fr      /* Age */
+                1fr;       /* Active */
+            background-color: #262627;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+
+        .guess-header div, .guess-cell {
+            padding: 5px 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .guess-cell {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-left: 8px;
+            position: relative;
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInRight 0.5s ease forwards;
+        }
+
+        .guess-cell.animate {
+            opacity: 0;
+            animation: fadeInRight 0.5s ease forwards;
+        }
+
+        /* Add specific delays for each column */
+        .guess-cell:nth-child(1) { animation-delay: 0.0s; }
+        .guess-cell:nth-child(2) { animation-delay: 0.1s; }
+        .guess-cell:nth-child(3) { animation-delay: 0.2s; }
+        .guess-cell:nth-child(4) { animation-delay: 0.3s; }
+        .guess-cell:nth-child(5) { animation-delay: 0.4s; }
+        .guess-cell:nth-child(6) { animation-delay: 0.5s; }
+        .guess-cell:nth-child(7) { animation-delay: 0.6s; }
+        .guess-cell:nth-child(8) { animation-delay: 0.7s; }
+        .guess-cell:nth-child(9) { animation-delay: 0.8s; }
+        .guess-cell:nth-child(10) { animation-delay: 0.9s; }  /* Added for Active column */
+
+        .guess-cell span {
+            min-width: unset;
+            text-align: left;
+            margin-right: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .indicator {
+            font-size: 15px;  /* Slightly reduced from 16px */
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            top: 1px;
+        }
+
+        .correct {
+            color: #538d4e;
+        }
+
+        .incorrect {
+            color: #963e3e;
+        }
+
+        .higher {
+            color: #b59f3b;
+        }
+
+        .lower {
+            color: #b59f3b;
+        }
+
+        .suggestions-container {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 400px;  /* Match input width */
+            background-color: #2f2f31;
+            border: 1px solid #3a3a3c;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 4px;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .suggestion-item {
+            padding: 10px 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background-color: #3a3a3c;
+        }
+
+        .game-message {
+            position: fixed;
+            left: 40px;
+            top: 190px;  /* Increased from 100px to 180px to move it lower */
+            background-color: #2f2f31;
+            padding: 20px;
+            border-radius: 4px;
+            text-align: left;
+            width: 300px;
+            border: 1px solid #3a3a3c;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+
+        .game-message.success {
+            border-color: #538d4e;
+        }
+
+        .game-message.error {
+            border-color: #963e3e;
+        }
+
+        .game-message h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #538d4e;
+            border-bottom: 1px solid #3a3a3c;
+            padding-bottom: 10px;
+        }
+
+        .game-message.error h2 {
+            color: #963e3e;
+        }
+
+        .game-message p {
+            margin: 8px 0;
+            font-size: 18px;
+            line-height: 1.4;
+        }
+
+        /* Add empty guess slots */
+        .empty-guess-slot {
+            display: grid;
+            grid-template-columns: 
+                2fr        /* Name */
+                1.1fr      /* Division/Weight */
+                1fr        /* Gender */
+                0.8fr      /* Wins */
+                0.8fr      /* Losses */
+                1.3fr      /* Stance */
+                1fr        /* Height */
+                1fr        /* Reach */
+                0.8fr      /* Age */
+                1fr;       /* Active */
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            height: 50px;
+            position: relative;
+            background-color: rgba(38, 38, 39, 0.5);  /* Slightly darker than background */
+        }
+
+        .empty-guess-slot::after {
+            content: attr(data-guess-number);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Hide empty slots when there's a guess in that position */
+        .empty-guess-slot.filled {
+            display: none;
+        }
+
+        #guess-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='ChatGPT Image Apr 9, 2025, 07_12_46 AM.png') }}" alt="">
+    </header>
+
+    <div class="game-message" id="game-message">
+        <h2>Game Status</h2>
+        <p id="message-text"></p>
+    </div>
+
+    <div class="game-container">
+        <div class="game-content">
+            <div class="input-area">
+                <input type="text" 
+                       id="fighter-input" 
+                       placeholder="Enter UFC fighter name"
+                       autocomplete="off">
+                <div id="suggestions" class="suggestions-container"></div>
+                <div class="button-group">
+                    <button id="submit-guess">Guess</button>
+                    <button id="new-fighter" class="new-fighter">New Fighter</button>
+                </div>
+            </div>
+
+            <div id="guesses">
+                <div class="guess-header">
+                    <div>Name</div>
+                    <div>Division</div>
+                    <div>Gender</div>
+                    <div>Wins</div>
+                    <div>Losses</div>
+                    <div>Stance</div>
+                    <div>Height</div>
+                    <div>Reach</div>
+                    <div>Age</div>
+                    <div>Active</div>
+                </div>
+                <div id="guess-container">
+                    <div class="empty-guess-slot" data-guess-number="1"></div>
+                    <div class="empty-guess-slot" data-guess-number="2"></div>
+                    <div class="empty-guess-slot" data-guess-number="3"></div>
+                    <div class="empty-guess-slot" data-guess-number="4"></div>
+                    <div class="empty-guess-slot" data-guess-number="5"></div>
+                    <div class="empty-guess-slot" data-guess-number="6"></div>
+                    <div class="empty-guess-slot" data-guess-number="7"></div>
+                    <div class="empty-guess-slot" data-guess-number="8"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let guessCount = 0;
+        const MAX_GUESSES = 8;
+
+        function convertHeightToFeetInches(inches) {
+            if (!inches) return "Unknown";
+            const feet = Math.floor(inches / 12);
+            const remainingInches = inches % 12;
+            return `${feet}'${remainingInches}`;
+        }
+
+        // Function to update fighter details display - simplified to just store the data
+        function updateFighterDetails(fighter) {
+            // We no longer need to update the UI since we removed it
+            // Just store the fighter data if needed for game logic
+            window.currentFighter = fighter;
+        }
+
+        // Load initial fighter when page loads
+        async function loadInitialFighter() {
+            try {
+                const response = await fetch('/new_fighter');
+                const data = await response.json();
+                if (data.success) {
+                    updateFighterDetails(data.fighter);
+                } else {
+                    console.error('Failed to load initial fighter:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading initial fighter:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadInitialFighter);
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        const input = document.getElementById('fighter-input');
+        const suggestionsContainer = document.getElementById('suggestions');
+
+        // Create debounced search function
+        const searchFighters = debounce(async (query) => {
+            if (query.length >= 2) {
+                try {
+                    const response = await fetch(`/search_fighters?query=${encodeURIComponent(query)}`);
+                    const fighters = await response.json();
+                    
+                    suggestionsContainer.innerHTML = '';
+                    
+                    if (fighters.length > 0) {
+                        fighters.forEach(fighter => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.textContent = fighter;
+                            div.addEventListener('click', () => {
+                                input.value = fighter;
+                                suggestionsContainer.style.display = 'none';
+                            });
+                            suggestionsContainer.appendChild(div);
+                        });
+                        suggestionsContainer.style.display = 'block';
+                    } else {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error fetching fighter suggestions:', error);
+                    suggestionsContainer.style.display = 'none';
+                }
+            } else {
+                suggestionsContainer.innerHTML = '';
+                suggestionsContainer.style.display = 'none';
+            }
+        }, 300);
+
+        function showGameMessage(message, isSuccess = false) {
+            const messageDiv = document.getElementById('game-message');
+            const messageText = document.getElementById('message-text');
+            messageDiv.className = 'game-message ' + (isSuccess ? 'success' : 'error');
+            messageText.textContent = message;
+            messageDiv.style.display = 'block';
+        }
+
+        function compareValues(guessed, target, type) {
+            if (type === 'string') {
+                return guessed.toLowerCase() === target.toLowerCase() ? 'equal' : 'different';
+            } else if (type === 'number') {
+                if (guessed === target) return 'equal';
+                return guessed > target ? 'higher' : 'lower';
+            } else if (type === 'boolean') {
+                return guessed === target ? 'equal' : 'different';
+            }
+            return 'different';
+        }
+
+        function getIndicatorHTML(comparison) {
+            switch (comparison) {
+                case 'equal':
+                    return '<i class="fas fa-check indicator correct"></i>';
+                case 'different':
+                    return '<i class="fas fa-times indicator incorrect"></i>';
+                case 'higher':
+                    return '<i class="fas fa-arrow-down indicator higher"></i>';
+                case 'lower':
+                    return '<i class="fas fa-arrow-up indicator lower"></i>';
+                default:
+                    return '';
+            }
+        }
+
+        function addGuessRow(fighter, isCorrect, targetFighter) {
+            const row = document.createElement('div');
+            row.className = 'guess-row';
+            
+            // Define the fields and their comparison types
+            const fields = [
+                { value: fighter.name, type: 'string' },
+                { value: fighter.weight, type: 'number', suffix: ' lbs' },
+                { value: fighter.gender, type: 'string' },
+                { value: fighter.wins, type: 'number' },
+                { value: fighter.losses, type: 'number' },
+                { value: fighter.stance || 'Unknown', type: 'string' },
+                { value: fighter.height, type: 'number', format: (val) => convertHeightToFeetInches(val) },
+                { value: fighter.reach, type: 'number', suffix: '"' },
+                { value: fighter.age, type: 'number' },
+                { value: fighter.active, type: 'boolean', format: (val) => val ? 'Active' : 'Retired' }
+            ];
+
+            const targetValues = [
+                targetFighter.name,
+                targetFighter.weight,
+                targetFighter.gender,
+                targetFighter.wins,
+                targetFighter.losses,
+                targetFighter.stance || 'Unknown',
+                targetFighter.height,
+                targetFighter.reach,
+                targetFighter.age,
+                targetFighter.active
+            ];
+            
+            // Create all cells first but don't add them to the row yet
+            const cells = fields.map((field, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'guess-cell';
+                
+                const comparison = compareValues(field.value, targetValues[index], field.type);
+                
+                // Format display value
+                let displayValue = field.value;
+                if (field.format) {
+                    displayValue = field.format(displayValue);
+                } else if (field.suffix) {
+                    displayValue += field.suffix;
+                }
+                
+                cell.innerHTML = `
+                    <span>${displayValue}</span>
+                    ${getIndicatorHTML(comparison)}
+                `;
+                return cell;
+            });
+
+            // Add all cells to the row
+            cells.forEach(cell => row.appendChild(cell));
+            
+            // Insert the guess before the corresponding slot number
+            const guessContainer = document.getElementById('guess-container');
+            const nextSlot = guessContainer.querySelector(`.empty-guess-slot[data-guess-number="${guessCount + 1}"]`);
+            if (nextSlot) {
+                guessContainer.insertBefore(row, nextSlot);
+            } else {
+                guessContainer.appendChild(row);
+            }
+
+            guessCount++;
+            
+            // Check if game is over - delay this check until after the last animation
+            setTimeout(() => {
+                if (isCorrect || guessCount >= MAX_GUESSES) {
+                    input.disabled = true;
+                    document.getElementById('submit-guess').disabled = true;
+                    if (isCorrect) {
+                        showGameMessage('Congratulations! You found the fighter!', true);
+                    } else if (guessCount >= MAX_GUESSES) {
+                        showGameMessage(`Game Over! The fighter was ${targetFighter.name}.`);
+                    }
+                }
+            }, 900); // Wait for all animations to complete
+
+            // After adding a guess, hide the corresponding empty slot
+            const emptySlots = document.querySelectorAll('.empty-guess-slot');
+            if (emptySlots[guessCount - 1]) {
+                emptySlots[guessCount - 1].classList.add('filled');
+            }
+        }
+
+        // Add input event listener
+        input.addEventListener('input', (e) => {
+            searchFighters(e.target.value);
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('submit-guess').addEventListener('click', async () => {
+            const fighterName = input.value.trim();
+            if (fighterName && guessCount < MAX_GUESSES) {
+                try {
+                    const response = await fetch('/submit_guess', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ fighter_name: fighterName })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Clear any existing error messages
+                        document.getElementById('game-message').style.display = 'none';
+                        
+                        addGuessRow(data.fighter, data.isCorrect, data.target_fighter);
+                        input.value = '';
+                        suggestionsContainer.style.display = 'none';
+                    } else {
+                        showGameMessage(data.error || 'Error submitting guess');
+                    }
+                } catch (error) {
+                    console.error('Error submitting guess:', error);
+                    showGameMessage('Error submitting guess');
+                }
+            }
+        });
+
+        // Handle new fighter button
+        document.getElementById('new-fighter').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/new_fighter');
+                const data = await response.json();
+                if (data.success) {
+                    // Reset game state
+                    guessCount = 0;
+                    const guessContainer = document.getElementById('guess-container');
+                    guessContainer.innerHTML = '';  // Clear all existing guesses
+                    
+                    // Add empty guess slots back
+                    for (let i = 1; i <= 8; i++) {
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = 'empty-guess-slot';
+                        emptySlot.setAttribute('data-guess-number', i);
+                        guessContainer.appendChild(emptySlot);
+                    }
+                    
+                    // Reset input state
+                    input.value = '';
+                    input.disabled = false;
+                    document.getElementById('submit-guess').disabled = false;
+                    document.getElementById('game-message').style.display = 'none';
+                    
+                    // Update fighter details
+                    updateFighterDetails(data.fighter);
+                } else {
+                    showGameMessage('Failed to select new fighter: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error selecting new fighter:', error);
+                showGameMessage('Error selecting new fighter');
+            }
+        });
+
+        // Show suggestions again when focusing on input if there's text
+        input.addEventListener('focus', () => {
+            if (input.value.length >= 2) {
+                searchFighters(input.value);
+            }
+        });
+    </script>
+</body>
+</html> 
